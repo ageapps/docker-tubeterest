@@ -1,0 +1,185 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="./my-youtube-video.html">
+<link rel="import" href="./my-searchbar.html">
+<link rel="import" href="../bower_components/app-localize-behavior/app-localize-behavior.html">
+<link rel="import" href="./my-noresult-view.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-timeline">
+    <template>
+        <style include="shared-styles">
+             :host {
+                display: block;
+            }
+
+            .card {
+                margin: 34px;
+            }
+
+            paper-search-bar {
+                --input-font-size: 20px;
+            }
+        </style>
+
+        <div class="card">
+            <paper-search-bar id="searchBar" hide-filter-button="true" placeholder="{{localize('message_search')}}" query="{{textInput}}" on-paper-search-search="search"></paper-search-bar>
+        </div>
+
+        <my-noresult-view text="{{localize('message_no_items')}}" loading="[[loading]]" empty="[[empty]]"></my-noresult-view>
+
+        <iron-ajax id="ajax" on-error="videoError" auto url="https://www.googleapis.com/youtube/v3/search" params$='{"part":"snippet", "q":"{{textSearched}}", "key": "AIzaSyAuecFZ9xJXbGDkQYWBmYrtzOGJD-iDIgI", "type": "video"}' handle-as="json" on-response="hresponse" debounce-duration="300"></iron-ajax>
+
+        <template is="dom-repeat" items="{{videoItems}}" as="item">
+            <my-youtube-video language="{{language}}" stored-favs="{{storedFavs}}" hidden="[[loading]]" liked="{{item.isFav}}" video-id="{{item.id.videoId}}" video-description="{{item.snippet.description}}" video-title="{{item.snippet.title}}"></my-youtube-video>
+        </template>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'my-timeline',
+            behaviors: [
+                Polymer.AppLocalizeBehavior
+            ],
+            properties: {
+                textSearched: {
+                    type: String,
+                    value: "polymer",
+                },
+                textInput: {
+                    type: String,
+                    value: "polymer",
+                    notify: true,
+                    observer: 'search'
+                },
+
+                loading: {
+                    type: Boolean,
+                    value: true,
+                },
+                empty: {
+                    type: Boolean,
+                    value: false,
+                },
+                storedFavs: {
+                    type: Array,
+                    notify: true,
+                    value: function() {
+                        return [];
+                    },
+                },
+                videoItems: {
+                    type: Array,
+                    notify: true,
+                    value: function() {
+                        return [];
+                    }
+                },
+                language: {
+                    value: 'en',
+                    type: String,
+                    //observer: '_languageChanged'
+                },
+                // languageURL: {
+                //     value: "com"
+                // }
+            },
+            observers: [
+                'favsChanged(storedFavs.splices)'
+            ],
+            ready: function() {
+                //console.log("storedFavs: " + this.storedFavs);
+            },
+            // on search event
+            search: function() {
+                //var text = this.$.searchBar.query;
+                //console.log("SEARCH " + this.textSearched);
+                if (this.textInput) {
+                    this.empty = false;
+                    this.loading = true;
+                    this.textSearched = this.textInput;
+                } else {
+                    this.empty = true;
+                    this.set('videoItems', []);
+                }
+            },
+            // response from videos request
+            hresponse: function(request) {
+                if (!this.textInput) {
+                    this.empty = true;
+                    this.loading = false;
+                    return;
+                }
+                var items = request.detail.response.items;
+                if (!items.length) {
+                    this.empty = true;
+                }
+                // reset videos in timeline
+                this.set('videoItems', []);
+                if (this.storedFavs && this.storedFavs.length) {
+                    // initialize videos in timeline
+                    for (var i = 0; i < items.length; i++) {
+                        if (this.storedFavs.includes(items[i].id.videoId)) {
+                            //console.log("fav");
+                            items[i].isFav = true;
+                        } else {
+                            //  console.log("no fav");
+                            items[i].isFav = false;
+                        }
+                        this.push('videoItems', items[i]);
+                        //  console.log(items[i].id.videoId);
+                    }
+                } else {
+                    for (var i = 0; i < items.length; i++) {
+                        items[i].isFav = false;
+                        this.push('videoItems', items[i]);
+                        //console.log(items[i].id.videoId);
+                    }
+                }
+                this.loading = false;
+            },
+            // listener to storedFavs array changes
+            favsChanged: function(changeRecord) {
+                this.empty = false;
+                if (changeRecord) {
+                    changeRecord.indexSplices.forEach(function(s) {
+                        s.removed.forEach(function(favRemovedId) {
+                            this.toggleFav(favRemovedId, false);
+                            console.log('Video ' + favRemovedId + ' UNLIKED');
+                        }, this);
+                        //console.log("Added: " + s.addedCount);
+                        for (var i = 0; i < s.addedCount; i++) {
+                            var index = s.index + i;
+                            var newId = [s.object[index].toString()];
+                            console.log('Video <' + newId + '> ADDED');
+                            this.toggleFav(newId, true);
+                        }
+                    }, this);
+                }
+            },
+            // change state of videos that changed
+            toggleFav: function(favRemovedId, makeFav) {
+                for (var i = 0; i < this.videoItems.length; i++) {
+                    //console.log("<" +this.videoItems[i].id.videoId.toString() + "> <" +favRemovedId+ "> " + (this.videoItems[i].id.videoId == favRemovedId));
+                    if (this.videoItems[i].id.videoId.toString() == favRemovedId) {
+                        //console.log("TOGGLE T: " + this.videoItems[i].isFav);
+                        this.set('videoItems.' + i + '.isFav', makeFav);
+                    }
+                }
+            },
+            attached: function() {
+                this.loadResources(this.resolveUrl('locales.json'));
+            },
+            videoError: function() {
+                    this.fire('error');
+                }
+                // _languageChanged: function() {
+                //     this.languageURL = this.getLanguage();
+                // },
+                // getLanguage: function() {
+                //     return this.language === 'en' ? 'com' : 'es';
+                // },
+        });
+    </script>
+</dom-module>

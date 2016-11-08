@@ -1,0 +1,28 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+</head><body><dom-module id="my-dialog">
+    <template>
+    <style>
+      :host {
+        display: block;
+      }
+      paper-button{
+        padding: 20px;
+      }
+      paper-dialog{
+        min-width: 300px;
+      }
+    </style>
+    <paper-dialog id="modal" modal="">
+    <h2>Enter your username</h2>
+    <p>Enter a username to store your favourites</p>
+    <paper-input label="Username" on-keydown="checkForEnter" value="{{query}}"></paper-input>
+    <div class="buttons">
+      <paper-button autofocus="" on-tap="_submit">OK</paper-button>
+    </div>
+    </paper-dialog>
+  </template>
+    <script>Polymer({is:"my-dialog",properties:{query:{type:String,notify:!0,value:""}},checkForEnter:function(i){13===i.keyCode&&this._submit()},_submit:function(){this.fire("submit")},open:function(){this.$.modal.open()},close:function(){this.$.modal.close()}});</script>
+</dom-module>
+</body></html>

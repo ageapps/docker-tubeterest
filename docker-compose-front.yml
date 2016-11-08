@@ -1,0 +1,26 @@
+version: "2"
+services:
+  front: # front-end server with NGINX and Polymer
+    build: ./front/
+    ports:
+      - "8080:80"
+    volumes:
+      - ./front/app:/www/app # volume in host -> $(pwd)/front/app/build/bundled
+      - ./front/nginx:/etc/nginx # volume in host -> $(pwd)/front/nginx
+    # FOR DEBUGING
+    # stdin_open: true
+    # tty: true
+    # command: bash
+
+  back: # back-end server with NodeJS that accesses DB
+    build: ./back/
+    volumes:
+      - ./back:/server # volume in host -> $(pwd)/back
+    environment:
+      - DB=1 # no need to connect to DB
+    # FOR DEBUGING
+    # ports:
+    #   - "8081:3000"
+    # stdin_open: true
+    # tty: true
+    # command: bash

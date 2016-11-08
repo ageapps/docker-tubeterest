@@ -1,0 +1,35 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="./my-youtube-video.html">
+<link rel="import" href="./my-searchbar.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/app-localize-behavior/app-localize-behavior.html">
+<link rel="import" href="./my-noresult-view.html">
+
+</head><body><dom-module id="my-favorites">
+    <template>
+        <style include="shared-styles">
+             :host {
+                display: block;
+            }
+
+            .card {
+                margin: 34px;
+            }
+
+            paper-search-bar {
+                --input-font-size: 20px;
+            }
+        </style>
+
+        <my-noresult-view text="{{localize('message_no_favs')}}" loading="[[loading]]" empty="[[empty]]"></my-noresult-view>
+
+        <iron-ajax id="ajax" url="" handle-as="json" on-response="hresponse"></iron-ajax>
+        <template is="dom-repeat" id="videosList" items="{{videoFavItems}}" as="video">
+            <my-youtube-video language="{{language}}" stored-favs="{{storedFavs}}" liked="" video-id="{{video.id.videoId}}" video-description="{{video.snippet.description}}" video-title="{{video.snippet.title}}"></my-youtube-video>
+        </template>
+
+    </template>
+    <script>Polymer({is:"my-favorites",behaviors:[Polymer.AppLocalizeBehavior],properties:{empty:{type:String,value:!1},language:{value:"en",type:String},storedFavs:{type:Array,notify:!0,value:function(){return[]}},videoFavItems:{type:Array,notify:!0,value:function(){return[]}},loading:{type:Boolean,value:!0}},observers:["favsChanged(storedFavs.splices)"],ready:function(){return this.storedFavs&&this.storedFavs.length?void this.requestFavs(this.storedFavs):(this.empty=!0,void(this.loading=!1))},hresponse:function(e){var t=e.detail.response.items[0];this.videoFavItems.includes(t)||this.push("videoFavItems",t),this.loading=!1},favsChanged:function(e){this.empty=!1,e&&e.indexSplices.forEach(function(e){e.removed.forEach(function(e){this.removeFav(e),console.log("TOGGLE F: "+!1)},this);for(var t=0;t<e.addedCount;t++){var s=e.index+t,i=[e.object[s].toString()];console.log("TOGGLE F: "+!0),this.requestFavs(i)}},this)},removeFav:function(e){for(var t=0;t<this.videoFavItems.length;t++)this.videoFavItems[t].id.videoId==e&&this.splice("videoFavItems",t,1);this.storedFavs&&this.storedFavs.length||(this.empty=!0)},requestFavs:function(e){for(var t=0;t<e.length;t++)this.$.ajax.url="https://www.googleapis.com/youtube/v3/search",this.$.ajax.params={part:"snippet",q:e[t],key:"AIzaSyAuecFZ9xJXbGDkQYWBmYrtzOGJD-iDIgI",type:"video"},this.$.ajax.generateRequest()},attached:function(){this.loadResources(this.resolveUrl("locales.json"))}});</script>
+</dom-module>
+</body></html>

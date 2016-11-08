@@ -1,0 +1,21 @@
+version: "2"
+services:
+  back: # back-end server with NodeJS that accesses DB
+    build: ./back/
+    ports:
+      - "8080:3000"
+    volumes:
+      - ./back:/server # volume in host -> $(pwd)/back
+    depends_on:
+      - db
+
+    # FOR DEBUGING
+    # stdin_open: true
+    # tty: true
+    # command: bash
+
+  db: # DB in MongoDB
+    image: mongo
+    command: mongod --smallfiles
+    volumes:
+      - ./database:/data # volume in host -> $(pwd)/database

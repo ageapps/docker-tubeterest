@@ -1,0 +1,107 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/app-localize-behavior/app-localize-behavior.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="./my-dialog.html">
+<link rel="import" href="./my-other-icons.html">
+
+</head><body><dom-module id="my-app">
+    <template>
+        <style include="paper-dialog-shared-styles">
+             :host {
+                --app-primary-color: #e91e63;
+                --app-secondary-color: black;
+                display: block;
+            }
+
+            app-header {
+                color: #fff;
+                background-color: var(--app-primary-color);
+            }
+
+            app-header paper-icon-button {
+                --paper-icon-button-ink-color: white;
+            }
+
+            .drawer-list {
+                margin: 0 20px;
+            }
+
+            .drawer-list a {
+                display: block;
+                padding: 0 16px;
+                text-decoration: none;
+                color: var(--app-secondary-color);
+                line-height: 40px;
+            }
+
+            .drawer-list a.iron-selected {
+                color: black;
+                font-weight: bold;
+            }
+
+            #userName{
+              margin-right: 20px
+            }
+
+            paper-toggle-button {
+                display: inline-block;
+            }
+        </style>
+
+        <app-location route="{{route}}"></app-location>
+        <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+
+        <app-drawer-layout fullbleed="">
+            
+            <app-drawer>
+                <app-toolbar>{{localize('menu')}}</app-toolbar>
+                <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+                    <a name="timeline" href="/timeline">{{localize('timeline')}}</a>
+                    <a name="favorites" href="/favorites">{{localize('favorites')}}</a>
+                    
+                </iron-selector>
+            </app-drawer>
+
+            
+            <app-header-layout has-scrolling-region="">
+
+                <app-header condenses="" reveals="" effects="waterfall">
+                    <app-toolbar>
+                        <paper-icon-button icon="menu" drawer-toggle=""></paper-icon-button>
+                        <div main-title="">Tubeterest</div>
+                        <p id="userName">{{username}}</p>
+                        <div class="lang">
+                            <span title="english"> 🇬🇧 </span>
+                            <paper-toggle-button on-change="_toggleLanguage" id="switch"></paper-toggle-button>
+                            <span title="french"> 🇪🇸 </span>
+                        </div>
+                    </app-toolbar>
+                </app-header>
+                <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
+                    <my-timeline on-error="timelineError" stored-favs="{{storedFavs}}" name="timeline" language="{{language}}"></my-timeline>
+                    <my-favorites stored-favs="{{storedFavs}}" name="favorites" language="{{language}}"></my-favorites>
+                    <my-view404 language="{{language}}" name="view404"></my-view404>
+                </iron-pages>
+                <iron-ajax id="loginRequest" url="/API/login" handle-as="json" method="POST" on-error="errorResponse" on-response="loginResponse"></iron-ajax>
+            </app-header-layout>
+        </app-drawer-layout>
+        <my-dialog id="dialog" query="{{username}}" on-submit="_login"></my-dialog>
+        <paper-toast id="toast" text=""></paper-toast>
+    </template>
+
+    <script>Polymer({is:"my-app",behaviors:[Polymer.AppLocalizeBehavior],properties:{page:{type:String,reflectToAttribute:!0,observer:"_pageChanged"},storedFavs:{type:Array,notify:!0,value:function(){return[]}},language:{value:"en",type:String},username:{type:String,value:""}},observers:["_routePageChanged(routeData.page)"],ready:function(){this.$.dialog.open()},_routePageChanged:function(e){this.page=e||"timeline"},_pageChanged:function(e){var t=this.resolveUrl("my-"+e+".html");this.importHref(t,null,this._showPage404,!0)},_showPage404:function(){this.page="view404"},attached:function(){this.loadResources(this.resolveUrl("locales.json"))},_toggleLanguage:function(){this.language=this.$.switch.checked?"es":"en"},loginResponse:function(e){if(200===e.detail.status){if(console.log(e.detail.response.favorites),e.detail.response.favorites.length>0)for(var t=0;t<e.detail.response.favorites.length;t++)this.push("storedFavs",e.detail.response.favorites[t]);this.$.dialog.close()}else this.$.toast.text=this.localize("error_log_in"),this.$.toast.show()},errorResponse:function(){this.$.toast.text=this.localize("error_server"),this.$.toast.show()},timelineError:function(){this.$.toast.text=this.localize("error_internet"),this.$.toast.show()},_login:function(){this.username&&(this.$.loginRequest.params={username:this.username},this.$.loginRequest.generateRequest())}});</script>
+</dom-module>
+</body></html>

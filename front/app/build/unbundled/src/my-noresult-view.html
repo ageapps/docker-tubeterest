@@ -1,0 +1,38 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+
+</head><body><dom-module id="my-noresult-view">
+    <template>
+        <style is="custom-style">
+             :host {
+                display: block;
+            }
+
+            .flex {
+                @apply(--layout-vertical);
+                @apply(--layout-center);
+            }
+
+            div[hidden] {
+                display: none;
+            }
+        </style>
+
+        <div class="flex">
+
+            <template is="dom-if" if="{{empty}}">
+                <h3>{{text}}</h3>
+                <img src="../images/manifest/icon-192x192.png" alt="no results">
+            </template>
+
+            <template is="dom-if" if="{{loading}}">
+                <paper-spinner active="{{loading}}"></paper-spinner>
+            </template>
+
+        </div>
+
+    </template>
+    <script>Polymer({is:"my-noresult-view",properties:{empty:{type:Boolean,value:!1},loading:{type:Boolean,value:!0},text:{type:String,value:"No items were found"},state:{type:Number,value:0,observer:"_stateChanged"}},ready:function(){},_stateChanged:function(){0===this.state?this.empty=!1:(this.empty=!0,this.loading=1==state)}});</script>
+</dom-module>
+</body></html>

@@ -1,0 +1,49 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="my-log-element">
+    <template>
+        <style>
+             :host {
+                display: block;
+            }
+        </style>
+
+        <h1>Log element</h1>
+        <span id="stateText"></span>!
+    </template>
+    <script>
+        MyLogElement = Polymer({
+
+            is: 'my-log-element',
+
+            created: function() {
+                this.logState(this.localName + '#' + this.id + ' was created');
+            },
+
+            ready: function() {
+                this.logState(this.localName + '#' + this.id + ' has local DOM initialized', true);
+            },
+
+            attached: function() {
+                this.logState(this.localName + '#' + this.id + ' was attached', true);
+            },
+
+            detached: function() {
+                this.logState(this.localName + '#' + this.id + ' was detached', true);
+            },
+
+            attributeChanged: function(name, type) {
+                this.logState(this.localName + '#' + this.id + ' attribute ' + name +
+                    ' was changed to ' + this.getAttribute(name), true);
+
+            },
+            logState: function(state, print) {
+                console.log(state);
+                if (print) {
+                    this.$.stateText.textContent = state;
+                }
+            }
+
+        });
+    </script>
+</dom-module>

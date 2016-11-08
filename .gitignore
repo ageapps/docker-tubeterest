@@ -1,0 +1,6 @@
+/node_modules
+/bower_components
+/back/node_modules
+/back/npm-debug.log
+/front/app/bower_components
+/database/configdb

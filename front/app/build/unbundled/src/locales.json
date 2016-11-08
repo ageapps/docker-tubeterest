@@ -1,0 +1,30 @@
+{
+    "en": {
+        "timeline": "Timeline",
+        "menu": "Menu",
+        "favorites": "Favorites",
+        "test": "Test",
+        "message_search": "Enter search term",
+        "video_text_title": "Description",
+        "made_fav": "Liked!",
+        "message_no_items": "No items found",
+        "message_no_favs": "No favorites found",
+        "error_log_in":"An error ocurred while logging in",
+        "error_server":"Unable to connect to server",
+        "error_internet":"Error loading videos, check internet connection"
+    },
+    "es": {
+        "timeline": "Muro",
+        "menu": "Menú",
+        "favorites": "Favoritos",
+        "test": "Testeo",
+        "message_search": "Introduzca su búsqueda",
+        "video_text_title": "Descripción",
+        "made_fav": "Te Gusta!",
+        "message_no_items": "No se ha encontrado ningún item",
+        "message_no_favs": "No se han encontrado favoritos",
+        "error_log_in":"Ha surgido un error en el login",
+        "error_server":"Error conectando al servidor",
+        "error_internet":"Error cargando los videos, comprueba tu conexión a internet"
+    }
+}

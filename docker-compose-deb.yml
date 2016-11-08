@@ -1,0 +1,26 @@
+version: "2"
+services:
+  front: # front-end server with NGINX and Polymer
+    build: ./front/
+    ports:
+      - "8080:80"
+    depends_on:
+      - back # depends resolving reverse-proxi hostname
+    volumes:
+      - ./front/app:/www/app # volume in host -> $(pwd)/front/app/build/bundled
+      - ./front/nginx:/etc/nginx # volume in host -> $(pwd)/front/nginx
+  back: # back-end server with NodeJS that accesses DB
+    build: ./back/
+    depends_on:
+      - db
+    volumes:
+      - ./back:/server # volume in host -> $(pwd)/back
+    # FOR DEBUGING
+    # stdin_open: true
+    # tty: true
+    # command: bash
+  db: # DB in MongoDB
+    image: mongo
+    command: mongod --smallfiles
+    volumes:
+      - ./database:/data # volume in host -> $(pwd)/database
