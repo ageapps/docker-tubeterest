@@ -35,6 +35,19 @@ $ docker-compose up
 // connect in your browser to <host IP>:8080
 ```
 
+## Usage with Docker Hub
+No download needed, images will pull automatically.
+
+```groovy
+// run mongo service
+$ docker run -v "$(pwd)"/database:/data --name mongo_tubeterest -d mongo mongod --smallfiles
+// run docker-tubeterest-node image
+$ docker run -d --name node_tubeterest --link mongo_tubeterest:db ageapps/docker-tubeterest-node:latest
+// run docker-tubeterest-nginx image
+$ docker run -d --name nginx_tubeterest --link node_tubeterest:back -p 8080:80 ageapps/docker-tubeterest-nginx:latest
+// connect in your browser to <host IP>:8080
+```
+
 ## Resources
 + [Polymer]: Front-End library
 + [NGINX]: Web server and reverse-proxi
@@ -47,7 +60,7 @@ $ docker-compose up
 
 
 
-[here]: http://swarm1397.cloudhero.io:8083/
+[here]: http://swarm1397.cloudhero.io:8085/
 [Microservices architecture]: http://microservices.io/patterns/microservices.html
 [SocketIOChatDemo]: https://github.com/ageapps/SocketIOChatDemo.git
 [node image]: https://hub.docker.com/_/node/
