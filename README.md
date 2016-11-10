@@ -1,5 +1,5 @@
+![foto](https://raw.githubusercontent.com/ageapps/docker-tubeterest/master/art/docker-tubeterest.jpg)
 # docker-tubeterest
-
 Dockerized tubeterest, based on my previous project [Tubeterest], which is an example of a web application using [Polymer] library.
 
 
